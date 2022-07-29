@@ -18,3 +18,9 @@ df1 = df1 %>%
     filter(year(ICU_AD_DTM)<'2020')              
 
 df2=merge(df1, SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], by.x= 'postcode', by.y='Postcode')
+
+df3_ANZROD = df2 %>%
+    filter(ANZRODIsSMR == 1) %>%
+    filter(READMITTED == 0) %>%
+    filter(ICU_OUTCM != 5) %>%
+    filter(ICU_SRCE !=5 & ICU_SRCE !=6)
