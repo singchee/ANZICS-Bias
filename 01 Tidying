@@ -1,12 +1,14 @@
 df1= APD%>%
-     select(c(PatientID, HospitalClassification, 
-              JurisdictionName,postcode,SiteID, AGE, ELECT, SEX,AP3DIAG, AP3_SUBCODE, ELECT_SURG, READMITTED,
-              PLAN_ICU, ECMO_IND, INV_IND, RENAL_IND, INOTROP_IND, 
-              ICU_AD_DTM, ICU_HRS,ICU_SRCE, ICU_OUTCM, DIED_ICU,
-              HOSP_OUTCM, HOSP_HRS, DIED_HOSP,
-              ANZRODIsSMR, 
-              ANZRODRiskofDeath_old, 
-              Apache3Score, Apache3IsSMR, Apache3RiskOfDeath, FRAILTY))
+    select(c(PatientID, HospitalClassification, 
+             JurisdictionName,postcode,SiteID, AGE, ELECT, SEX,AP3DIAG, AP3_SUBCODE, ELECT_SURG, READMITTED,
+             PLAN_ICU, ECMO_IND, INV_IND, RENAL_IND, INOTROP_IND, 
+             ICU_AD_DTM, ICU_HRS,ICU_SRCE, ICU_OUTCM, DIED_ICU,
+             HOSP_OUTCM, HOSP_HRS, DIED_HOSP,
+             ANZRODIsSMR, 
+             ANZRODRiskofDeath_old, 
+             Apache3Score, Apache3IsSMR, Apache3RiskOfDeath, FRAILTY)) %>%
+    mutate(postcode=as.numeric(postcode))
+              
               
 df1 = df1 %>% 
     
