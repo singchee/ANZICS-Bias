@@ -49,3 +49,8 @@ df3_ANZROD %>%
     
     
 forestplot("AUC",mean=0.9234, lower = 0.9194, upper=0.9273, zero=0.9)
+
+ANZROD_AUC=df3_ANZROD %>% 
+     group_by(SEIFA) %>% 
+    summarise(
+    transpose(as.data.frame(pROC::ci(predictor = ANZROD, response = DIED_HOSP))))
