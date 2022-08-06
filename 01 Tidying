@@ -26,6 +26,7 @@ df2=merge(df1, SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], b
 df2 = df2%>%
     mutate(SEIFA=as.numeric(`Advantage and Disadvtage Decile`)) %>%
     filter(SEIFA != is.na(SEIFA)) %>%
+    mutate(SEIFA = as.factor(SEIFA))
 
 df3_ANZROD = df2 %>%
     filter(ANZRODIsSMR == 1) %>%
