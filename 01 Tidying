@@ -1,3 +1,8 @@
+library(ems)
+library(tidyverse)
+library(lubridate)
+library(pROC)
+
 df1= APD%>%
     select(c(PatientID, HospitalClassification, 
              JurisdictionName,postcode,SiteID, AGE, ELECT, SEX,AP3DIAG, AP3_SUBCODE, ELECT_SURG, READMITTED,
@@ -33,3 +38,13 @@ df3_ANZROD = df2 %>%
     filter(READMITTED == 0) %>%
     filter(ICU_OUTCM != 5) %>%
     filter(ICU_SRCE !=5 & ICU_SRCE !=6)
+
+SMR=SMR.table(data=df3_ANZROD, obs.var= 'DIED_HOSP', pred.var= 'ANZROD',group.var = "SEIFA", digits = 3, ci.method=c("Hosmer"), ci.level=0.95)
+
+df3_ANZROD %>%
+    filter(SEIFA == "1") %>%
+    roc(DIED_HOSP, ANZROD) %>%
+    print() %>%
+    ci()
+    
+    
