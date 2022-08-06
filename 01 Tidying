@@ -48,3 +48,4 @@ df3_ANZROD %>%
     ci()
     
     
+forestplot("AUC",mean=0.9234, lower = 0.9194, upper=0.9273, zero=0.9)
