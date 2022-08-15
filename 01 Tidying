@@ -4,8 +4,8 @@ library(lubridate)
 library(pROC)
 
 SEIFAscore = SEIFAscore %>%
-    add_row(Postcode="9999", `Advantage and Disadvtage Decile`="0") %>%
-    add_row(Postcode = "0", `Advantage and Disadvtage Decile` ="0")
+    add_row(Postcode= 9999, `Advantage and Disadvtage Decile`="0") %>%
+    add_row(Postcode = 0, `Advantage and Disadvtage Decile` ="0")
 
 df1= APD%>%
     select(c(PatientID, HospitalClassification, 
@@ -26,21 +26,40 @@ df1 = df1 %>%
     filter(year(ICU_AD_DTM)<'2020') %>%
     filter(READMITTED == 0) %>%
     filter(ICU_OUTCM != 5) %>%
-    filter(ICU_SRCE !=5 & ICU_SRCE !=6)
+    filter(ICU_SRCE !=5 & modICU_SRCE !=6)
         
 
 df2=merge(df1, SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], by.x= 'postcode', by.y='Postcode')
 
+SEIFA_levels = order(levels(as.factor(df2$`Advantage and Disadvtage Decile`))) -1
+
 df2 = df2%>%
-    mutate(SEIFA=as.numeric(`Advantage and Disadvtage Decile`)) %>%
-    filter(SEIFA != is.na(SEIFA)) %>%
-    mutate(SEIFA = as.factor(SEIFA))
+    mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels)) #convert to ordered factors
 
 df3_ANZROD = df2 %>%
     filter(ANZRODIsSMR == 1) %>%
     filter(READMITTED == 0) %>%
     filter(ICU_OUTCM != 5) %>%
-    filter(ICU_SRCE !=5 & ICU_SRCE !=6)
+    filter(ICU_SRCE !=5 & ICU_SRCE !=6) %>%
+    filter(`Advantage and Disadvtage Decile` >= "0") %>%
+    mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels))
+
+#Mixed effects modelling
+mod = glmer(DIED_HOSP ~ ANZROD + SEIFA + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+
+#extract SEIFA estimates
+eff_SEIFA1 = mod %>%
+    tidy(effects = "fixed", conf.int = TRUE)%>% #extract fixed effect estimats
+    filter(str_detect(term, "SEIFA")) %>% #filter out predictors that have "series" 
+    mutate(across(c(estimate, starts_with("conf")), exp)) %>%
+    mutate(SEIFA = as.factor(seq_along(1:nrow(.))+1))
+
+#PLOT SEIFA Estimates
+eff_SEIFA1 %>%
+    ggplot(aes(x=SEIFA, estimate)) + #plot
+    geom_point() + 
+    geom_linerange(aes(ymin = conf.low, ymax = conf.high))
+
 
 SMR=SMR.table(data=df3_ANZROD, obs.var= 'DIED_HOSP', pred.var= 'ANZROD',group.var = "SEIFA", digits = 3, ci.method=c("Hosmer"), ci.level=0.95)
     
