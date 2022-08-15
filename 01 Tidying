@@ -3,6 +3,10 @@ library(tidyverse)
 library(lubridate)
 library(pROC)
 
+SEIFAscore = SEIFAscore %>%
+    add_row(Postcode="9999", `Advantage and Disadvtage Decile`="0") %>%
+    add_row(Postcode = "0", `Advantage and Disadvtage Decile` ="0")
+
 df1= APD%>%
     select(c(PatientID, HospitalClassification, 
              JurisdictionName,postcode,SiteID, AGE, ELECT, SEX,AP3DIAG, AP3_SUBCODE, ELECT_SURG, READMITTED,
