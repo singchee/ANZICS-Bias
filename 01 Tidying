@@ -45,7 +45,7 @@ df3_ANZROD = df2 %>%
     mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels))
 
 #Mixed effects modelling
-mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 12) + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
 
 #extract SEIFA estimates
 eff_SEIFA1 = mod %>%
