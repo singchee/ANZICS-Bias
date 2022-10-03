@@ -47,16 +47,17 @@ df3_ANZROD = df2 %>%
 #Mixed effects modelling
 mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
 
-mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11)  + (1|SiteID), data=subset(df3_ANZROD, HospitalClassification == "Private"), family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+data_model = subset(df3_ANZROD, HospitalClassification == "Private") # or Tertiary , Rural / Regional , Private , Metropolitan
 
-#extract SEIFA estimates
+mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11)  + (1|SiteID), data=data_model, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+
+#extract SEIFA estimates , PLOT SEIFA Estimates
 eff_SEIFA1 = mod %>%
     tidy(effects = "fixed", conf.int = TRUE)%>% #extract fixed effect estimats
     filter(str_detect(term, "SEIFA")) %>% #filter out predictors that have "series" 
     mutate(across(c(estimate, starts_with("conf")), exp)) %>%
-    mutate(SEIFA = as.factor(seq_along(1:nrow(.))+1))
+    mutate(SEIFA = as.factor(seq_along(1:nrow(.))-1))
 
-#PLOT SEIFA Estimates
 eff_SEIFA1 %>%
     ggplot(aes(x=SEIFA, estimate)) + #plot
     geom_point() + 
