@@ -1,6 +1,7 @@
 library(ems)
 library(tidyverse)
 library(lubridate)
+library(car)
 library(pROC)
 
 SEIFAscore = SEIFAscore %>%
@@ -63,6 +64,7 @@ eff_SEIFA1 %>%
     geom_point() + 
     geom_linerange(aes(ymin = conf.low, ymax = conf.high))
 
+car::Anova(mod)
 
 SMR=SMR.table(data=df3_ANZROD, obs.var= 'DIED_HOSP', pred.var= 'ANZROD',group.var = "SEIFA", digits = 3, ci.method=c("Hosmer"), ci.level=0.95)
     
