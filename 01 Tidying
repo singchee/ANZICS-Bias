@@ -47,6 +47,8 @@ df3_ANZROD = df2 %>%
 #Mixed effects modelling
 mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
 
+mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11)  + (1|SiteID), data=subset(df3_ANZROD, HospitalClassification == "Private"), family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+
 #extract SEIFA estimates
 eff_SEIFA1 = mod %>%
     tidy(effects = "fixed", conf.int = TRUE)%>% #extract fixed effect estimats
