@@ -6,7 +6,8 @@ library(pROC)
 
 SEIFAscore = SEIFAscore %>%
     add_row(Postcode= 9999, `Advantage and Disadvtage Decile`="0") %>%
-    add_row(Postcode = 0, `Advantage and Disadvtage Decile` ="0") %>%
+    add_row(Postcode = 0, `Advantage and Disadvtage Decile` ="0") %>
+    filter(`Advantage and Disadvtage Decile` != "-")
 
 df1= APD%>%
     select(c(PatientID, HospitalClassification, 
@@ -29,7 +30,8 @@ df1 = df1 %>%
     filter(ICU_SRCE !=5 & ICU_SRCE !=6)
         
 
-df2=merge(df1, SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], by.x= 'postcode', by.y='Postcode')
+df2 = df1 %>%
+	merge(SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], by.x= 'postcode', by.y='Postcode')
 
 SEIFA_levels = order(levels(as.factor(df2$`Advantage and Disadvtage Decile`))) -1
 
@@ -67,6 +69,8 @@ catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "NIV_IND", "R
 
 tab = CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
 
+tab_compareSEIFA = df3_ANZROD %>% filter(SEIFA == 1 | SEIFA == 10) %>%
+		 CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
 
 #Mixed effects modelling
 mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
