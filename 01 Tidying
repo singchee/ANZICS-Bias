@@ -77,6 +77,7 @@ tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT
                                           "HOSP_HRS", "ICU_HRS", 
                                           "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "SEIFA_quart", factorVars = catVars)
 nonnormalVars = c("AGE", "Apache2Score", "Apache3Score","ANZROD", "HOSP_HRS", "ICU_HRS")
+print(tab, nonnormal=nonnormalVars)
 
 
 
