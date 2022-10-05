@@ -51,7 +51,10 @@ df3_ANZROD = df2 %>%
 		SEIFA_num %in% 6:7 ~ "6-7",
 		SEIFA_num %in% 8:10 ~ "8-10"))
 
-#TABLE 1$
+#TABLE 1
+
+library(tableone)
+
 df3_ANZROD = df3_ANZROD %>%
     mutate(APACHE_diag = 
         case_when(
@@ -67,8 +70,14 @@ df3_ANZROD = df3_ANZROD %>%
             (AP3DIAG >= 1000 & AP3DIAG <= 1199) | (AP3DIAG >= 800 & AP3DIAG <= 899) | AP3DIAG == "0"  ~ "Other"))
 
 
-library(tableone)
-catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "NIV_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag","plan_surg" )
+catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag")
+
+tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "Apache3Score","ANZROD", 
+                                          "DIED_ICU","DIED_HOSP", 
+                                          "HOSP_HRS", "ICU_HRS", 
+                                          "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "SEIFA_quart", factorVars = catVars)
+nonnormalVars = c("AGE", "Apache2Score", "Apache3Score","ANZROD", "HOSP_HRS", "ICU_HRS")
+
 
 
 tab = CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
