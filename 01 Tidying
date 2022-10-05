@@ -44,8 +44,12 @@ df3_ANZROD = df2 %>%
     filter(ICU_OUTCM != 5) %>%
     filter(ICU_SRCE !=5 & ICU_SRCE !=6) %>%
     filter(`Advantage and Disadvtage Decile` >= "0") %>%
-    mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels))
-
+    mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels)) %>%
+    mutate(SEIFA_num=as.numeric(SEIFA)-1) %>%
+    mutate(SEIFA_quart = case_when(SEIFA_num %in% 0:2 ~ "0-2", 
+    		SEIFA_num %in% 3:5 ~ "3-5", 
+		SEIFA_num %in% 6:7 ~ "6-7",
+		SEIFA_num %in% 8:10 ~ "8-10"))
 
 #TABLE 1$
 df3_ANZROD = df3_ANZROD %>%
