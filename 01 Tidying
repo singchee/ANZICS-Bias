@@ -6,8 +6,9 @@ library(pROC)
 
 SEIFAscore = SEIFAscore %>%
     add_row(Postcode= 9999, `Advantage and Disadvtage Decile`="0") %>%
-    add_row(Postcode = 0, `Advantage and Disadvtage Decile` ="0") %>
     filter(`Advantage and Disadvtage Decile` != "-")
+
+*    add_row(Postcode = 0, `Advantage and Disadvtage Decile` ="0") %>* old ode
 
 df1= APD%>%
     select(c(PatientID, HospitalClassification, 
@@ -48,8 +49,8 @@ df3_ANZROD = df2 %>%
     mutate(SEIFA_num=as.numeric(SEIFA)-1) %>%
     mutate(SEIFA_quart = case_when(SEIFA_num %in% 0:2 ~ "0-2", 
     		SEIFA_num %in% 3:5 ~ "3-5", 
-		SEIFA_num %in% 6:7 ~ "6-7",
-		SEIFA_num %in% 8:10 ~ "8-10"))
+		SEIFA_num %in% 6:7 ~ "6-8",
+		SEIFA_num %in% 8:10 ~ "9-10"))
 
 #TABLE 1
 
@@ -78,6 +79,7 @@ tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT
                                           "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "SEIFA_quart", factorVars = catVars)
 nonnormalVars = c("AGE", "Apache2Score", "Apache3Score","ANZROD", "HOSP_HRS", "ICU_HRS")
 print(tab, nonnormal=nonnormalVars)
+write.csv(print(tab, nonnormal=nonnormalVars), file="tab1_all.csv")
 
 
 
