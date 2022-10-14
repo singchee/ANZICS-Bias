@@ -5,10 +5,7 @@ library(car)
 library(pROC)
 
 SEIFAscore = SEIFAscore %>%
-    add_row(Postcode= 9999, `Advantage and Disadvtage Decile`="0") %>%
     filter(`Advantage and Disadvtage Decile` != "-")
-
-*    add_row(Postcode = 0, `Advantage and Disadvtage Decile` ="0") %>* old ode
 
 df1= APD%>%
     select(c(PatientID, HospitalClassification, 
@@ -29,6 +26,7 @@ df1 = df1 %>%
     filter(READMITTED == 0) %>%
     filter(ICU_OUTCM != 5) %>%
     filter(ICU_SRCE !=5 & ICU_SRCE !=6)
+    filter(JurisdictionName != "NZ")
         
 
 df2 = df1 %>%
