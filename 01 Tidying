@@ -45,10 +45,10 @@ df3_ANZROD = df2 %>%
     filter(`Advantage and Disadvtage Decile` >= "0") %>%
     mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels)) %>%
     mutate(SEIFA_num=as.numeric(SEIFA)-1) %>%
-    mutate(SEIFA_quart = case_when(SEIFA_num %in% 0:2 ~ "0-2", 
-    		SEIFA_num %in% 3:5 ~ "3-5", 
-		SEIFA_num %in% 6:7 ~ "6-8",
-		SEIFA_num %in% 8:10 ~ "9-10"))
+    mutate(SEIFA_quart = case_when(SEIFA_num %in% 1:2 ~ "1-2", 
+                                   SEIFA_num %in% 3:5 ~ "3-5", 
+                                   SEIFA_num %in% 6:8 ~ "6-8",
+                                   SEIFA_num %in% 9:10 ~ "9-10"))
 
 #TABLE 1
 
@@ -75,9 +75,17 @@ tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT
                                           "DIED_ICU","DIED_HOSP", 
                                           "HOSP_HRS", "ICU_HRS", 
                                           "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "SEIFA_quart", factorVars = catVars)
+
+
+tab_all = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
+                                                "DIED_ICU","DIED_HOSP", 
+                                                "HOSP_HRS", "ICU_HRS", 
+                                                "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), factorVars = catVars)
+
 nonnormalVars = c("AGE", "Apache2Score", "Apache3Score","ANZROD", "HOSP_HRS", "ICU_HRS")
-print(tab, nonnormal=nonnormalVars)
-write.csv(print(tab, nonnormal=nonnormalVars), file="tab1_all.csv")
+
+tab1_merged=cbind(print(tab_all, nonnormal=nonnormalVars), print(tab, nonnormal=nonnormalVars))
+write.csv(tab1_merged, file="tab1_merged.csv")
 
 
 
