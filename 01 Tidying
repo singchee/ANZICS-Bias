@@ -37,7 +37,8 @@ df1 = df1 %>%
     filter(READMITTED == 0) %>%
     filter(ICU_OUTCM != 5) %>%
     filter(ICU_SRCE !=5 & ICU_SRCE !=6) %>%
-    filter(JurisdictionName != "NZ")
+    filter(JurisdictionName != "NZ") %>%
+    filter(ELECT !=1)
         
 Remoteness = Remoteness %>%
     filter(POSTCODE != unique(POSTCODE))
