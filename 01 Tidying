@@ -7,6 +7,8 @@ library(pROC)
 SEIFAscore = SEIFAscore %>%
     filter(`Advantage and Disadvtage Decile` != "-")
 
+
+
 APD %>%
     filter(JurisdictionName != "NZ") %>%
     filter(year(ICU_AD_DTM)<'2020') %>%
@@ -37,27 +39,20 @@ df1 = df1 %>%
     filter(ICU_SRCE !=5 & ICU_SRCE !=6) %>%
     filter(JurisdictionName != "NZ")
         
+Remoteness = Remoteness %>%
+    filter(POSTCODE != unique(POSTCODE))
 
 df2 = df1 %>%
-	merge(SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], by.x= 'postcode', by.y='Postcode')
+    merge(SEIFAscore[,c("Postcode", "Disadvantage Decile") ], by.x= 'postcode', by.y='Postcode') %>%
+    merge(Remoteness[,c("POSTCODE", "Remoteness Index") ], by.x= 'postcode', by.y='POSTCODE') %>%
+    rename(IRSED = 'Disadvantage Decile') %>%
+    rename(Remoteness = 'Remoteness Index') %>%
+    mutate(IRSED = as.factor(IRSED), Remoteness = as.factor(Remoteness))
 
-SEIFA_levels = order(levels(as.factor(df2$`Advantage and Disadvtage Decile`))) -1
-
-df2 = df2%>%
-    mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels)) #convert to ordered factors
 
 df3_ANZROD = df2 %>%
-    filter(ANZRODIsSMR == 1) %>%
-    filter(READMITTED == 0) %>%
-    filter(ICU_OUTCM != 5) %>%
-    filter(ICU_SRCE !=5 | ICU_SRCE !=6) %>%
-    filter(`Advantage and Disadvtage Decile` >= "0") %>%
-    mutate(SEIFA = factor(`Advantage and Disadvtage Decile`, levels = SEIFA_levels)) %>%
-    mutate(SEIFA_num=as.numeric(SEIFA)-1) %>%
-    mutate(SEIFA_quart = case_when(SEIFA_num %in% 1:2 ~ "1-2", 
-                                   SEIFA_num %in% 3:5 ~ "3-5", 
-                                   SEIFA_num %in% 6:8 ~ "6-8",
-                                   SEIFA_num %in% 9:10 ~ "9-10"))
+    filter(ANZRODIsSMR == 1)
+    
 
 #TABLE 1
 
@@ -104,7 +99,9 @@ tab_compareSEIFA = df3_ANZROD %>% filter(SEIFA == 1 | SEIFA == 10) %>%
 		 CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
 
 #Mixed effects modelling
-mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+
+mod = glmer(DIED_HOSP ~ ANZROD + relevel(IRSED, ref= 10) + relevel(Remoteness, ref= 1) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+
 
 data_model = subset(df3_ANZROD, HospitalClassification == "Private") # or Tertiary , Rural / Regional , Private , Metropolitan
 
