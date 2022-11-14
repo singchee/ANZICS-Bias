@@ -47,7 +47,8 @@ df2 = df1 %>%
     merge(Remoteness[,c("POSTCODE", "Remoteness Index") ], by.x= 'postcode', by.y='POSTCODE') %>%
     rename(IRSED = 'Disadvantage Decile') %>%
     rename(Remoteness = 'Remoteness Index') %>%
-    mutate(IRSED = as.factor(IRSED), Remoteness = as.factor(Remoteness))
+    mutate(IRSED = as.factor(IRSED), Remoteness = as.factor(Remoteness)) %>%
+    mutate(year=year(ICU_AD_DTM))
 
 
 df3_ANZROD = df2 %>%
