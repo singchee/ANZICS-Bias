@@ -27,40 +27,8 @@ df1= APD%>%
              ANZRODIsSMR, 
              ANZRODRiskofDeath_old, 
              Apache3Score, Apache3IsSMR, Apache3RiskOfDeath, FRAILTY))
-              
-              
-df1 = df1 %>% 
-    mutate(postcode=as.numeric(postcode))%>%
-    replace_na(list(postcode=0, DIED_ICU=0, DIED_HOSP=0, PLAN_ICU=0, ELECT=0, ELECT_SURG=0, ECMO_IND=0, INV_IND=0, RENAL_IND=0, INOTROP_IND=0, VENTILATED=0, postcode = 0)) %>%
-    mutate(ANZROD = ANZRODRiskofDeath_old, SEX = recode(SEX, NULL="O", I="O"), year = year(ICU_AD_DTM)) %>%
-    filter(year(ICU_AD_DTM)<'2020') %>%
-    filter(READMITTED == 0) %>%
-    filter(ICU_OUTCM != 5) %>%
-    filter(ICU_SRCE !=5 & ICU_SRCE !=6) %>%
-    filter(JurisdictionName != "NZ") %>%
-    filter(ELECT !=1)
-        
-Remoteness = Remoteness %>%
-    filter(POSTCODE != unique(POSTCODE))
 
-df2 = df1 %>%
-    merge(SEIFAscore[,c("Postcode", "Disadvantage Decile") ], by.x= 'postcode', by.y='Postcode') %>%
-    merge(Remoteness[,c("POSTCODE", "Remoteness Index") ], by.x= 'postcode', by.y='POSTCODE') %>%
-    rename(IRSED = 'Disadvantage Decile') %>%
-    rename(Remoteness = 'Remoteness Index') %>%
-    mutate(IRSED = as.factor(IRSED), Remoteness = as.factor(Remoteness)) %>%
-    mutate(year=year(ICU_AD_DTM))
-
-
-df3_ANZROD = df2 %>%
-    filter(ANZRODIsSMR == 1)
-    
-
-#TABLE 1
-
-library(tableone)
-
-df3_ANZROD = df3_ANZROD %>%
+df1 = df1 %>%
     mutate(APACHE_diag = 
         case_when(
             (AP3DIAG >= 100 & AP3DIAG <= 199 ) | AP3DIAG == 1202 | AP3DIAG == 1203 | AP3DIAG == 1204 | AP3DIAG == 1205 | AP3DIAG == 1211 | AP3DIAG == 1213 ~ "CVS",
@@ -74,6 +42,38 @@ df3_ANZROD = df3_ANZROD %>%
 	    AP3DIAG >= 900 & AP3DIAG <= 999 ~ "Renal",
             (AP3DIAG >= 1000 & AP3DIAG <= 1199) | (AP3DIAG >= 800 & AP3DIAG <= 899) | AP3DIAG == "0"  ~ "Other"))
 
+              
+df1 = df1 %>% 
+    mutate(postcode=as.numeric(postcode))%>%
+    replace_na(list(postcode=0, DIED_ICU=0, DIED_HOSP=0, PLAN_ICU=0, ELECT=0, ELECT_SURG=0, ECMO_IND=0, INV_IND=0, RENAL_IND=0, INOTROP_IND=0, VENTILATED=0, postcode = 0)) %>%
+    mutate(ANZROD = ANZRODRiskofDeath_old, SEX = recode(SEX, NULL="O", I="O"), year = year(ICU_AD_DTM)) %>%
+    filter(year(ICU_AD_DTM)<'2020') %>%
+    filter(READMITTED == 0) %>%
+    filter(ICU_OUTCM != 5) %>%
+    filter(ICU_SRCE !=5 & ICU_SRCE !=6) %>%
+    filter(JurisdictionName != "NZ") %>%
+    filter(PLAN_ICU !=1)
+        
+Remoteness = Remoteness %>%
+    filter(POSTCODE != unique(POSTCODE))
+
+df2 = df1 %>%
+    merge(SEIFAscore[,c("Postcode", "Disadvantage Decile") ], by.x= 'postcode', by.y='Postcode') %>%
+    merge(SEIFAscore[,c("Postcode", "Advantage and Disadvtage Decile") ], by.x= 'postcode', by.y='Postcode') %>%
+    merge(Remoteness[,c("POSTCODE", "Remoteness Index") ], by.x= 'postcode', by.y='POSTCODE') %>%
+    rename(IRSED = 'Disadvantage Decile') %>%
+    rename(Remoteness = 'Remoteness Index') %>%
+    rename(IRSEAD = "Advantage and Disadvtage Decile") %>%
+    mutate(IRSED = as.factor(IRSED), Remoteness = as.factor(Remoteness), IRSEAD = as.factor(IRSEAD)) %>%
+    mutate(year=year(ICU_AD_DTM))
+ 
+df3_ANZROD = df2 %>%
+    filter(ANZRODIsSMR == 1)
+    
+
+#TABLE 1
+
+library(tableone)
 
 catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag")
 
@@ -100,40 +100,67 @@ tab = CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA",
 tab_compareSEIFA = df3_ANZROD %>% filter(SEIFA == 1 | SEIFA == 10) %>%
 		 CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
 
-#Mixed effects modelling
+#Mixed effects modelling for IRSEAD
 
-mod = glmer(DIED_HOSP ~ ANZROD + relevel(IRSED, ref= 10) + relevel(Remoteness, ref= 1) + HospitalClassification + (1|SiteID), data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
+mod_IRSEAD = glmer(DIED_HOSP ~ ANZROD + 
+	relevel(IRSEAD, ref= 10) + 
+	relevel(Remoteness, ref= 1) + 
+	HospitalClassification + 
+	(1|SiteID), 
+	data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0) #IRSEAD
 
-
-data_model = subset(df3_ANZROD, HospitalClassification == "Private") # or Tertiary , Rural / Regional , Private , Metropolitan
-
-mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11)  + (1|SiteID), data=data_model, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
-
-#extract SEIFA estimates , PLOT SEIFA Estimates
-eff_SEIFA1 = mod %>%
+eff_IRSEAD = mod_IRSEAD %>%
     tidy(effects = "fixed", conf.int = TRUE)%>% #extract fixed effect estimats
-    filter(str_detect(term, "SEIFA")) %>% #filter out predictors that have "series" 
+    filter(str_detect(term, "IRSEAD")) %>% #filter out predictors that have "series" 
     mutate(across(c(estimate, starts_with("conf")), exp)) %>%
-    mutate(SEIFA = as.factor(seq_along(1:nrow(.))))
+    mutate(IRSEAD = as.factor(seq_along(1:nrow(.))))
 
-eff_SEIFA1 %>%
-    ggplot(aes(x=SEIFA, estimate)) + #plot
+eff_IRSEAD %>%
+    ggplot(aes(x=IRSEAD, estimate)) + #plot
+    geom_point() + 
+    geom_linerange(aes(ymin = conf.low, ymax = conf.high))
+
+
+#Mixed effects modelling for IRSED
+
+
+mod_IRSED = glmer(DIED_HOSP ~ ANZROD + 
+	relevel(IRSED, ref= 10) + 
+	relevel(Remoteness, ref= 1) + 
+	HospitalClassification + 
+	(1|SiteID), 
+	data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0) #IRSED
+
+
+#extract IRSED estimates , PLOT SEIFA Estimates
+ eff_IRSED = mod_IRSED %>%
+     tidy(effects = "fixed", conf.int = TRUE)%>% #extract fixed effect estimats
+     filter(str_detect(term, "IRSED")) %>% #filter out predictors that have "series" 
+     mutate(across(c(estimate, starts_with("conf")), exp)) %>%
+     mutate(IRSED = as.factor(seq_along(1:nrow(.))))
+
+
+  eff_IRSED %>%
+    ggplot(aes(x=IRSED, estimate)) + #plot
+     geom_point() + 
+    geom_linerange(aes(ymin = conf.low, ymax = conf.high))
+
+
+eff_remoteness = mod %>%
+    tidy(effects = "fixed", conf.int = TRUE)%>% #extract fixed effect estimats
+    filter(str_detect(term, "Remote")) %>% #filter out predictors that have "series" 
+    mutate(across(c(estimate, starts_with("conf")), exp)) %>%
+    mutate(Remoteness = as.factor(seq_along(1:nrow(.))+1))
+
+eff_remoteness %>%
+    ggplot(aes(x=Remoteness, estimate)) + #plot
     geom_point() + 
     geom_linerange(aes(ymin = conf.low, ymax = conf.high))
 
 car::Anova(mod)
 
-SMR=SMR.table(data=df3_ANZROD, obs.var= 'DIED_HOSP', pred.var= 'ANZROD',group.var = "SEIFA", digits = 3, ci.method=c("Hosmer"), ci.level=0.95)
-    
- ANZROD_AUC=df3_ANZROD %>% 
-    group_by(SEIFA) %>% 
-    summarise(
-        transpose(as.data.frame(pROC::ci(predictor = ANZROD, response = DIED_HOSP))))
-    
-ANZROD_AUC = ANZROD_AUC %>%
-    dplyr::rename(Lower = V1, Mean = V2, Upper = V3)
-    
-forestplot("AUC",mean=0.9234, lower = 0.9194, upper=0.9273, zero=0.9)
- ANZROD_AUC %>% forestplot(labeltext = c(SEIFA), mean=Mean, lower=Lower, upper=Upper, clip=c(0.8, 1.0), zero=0.9) # refer to https://www.r-bloggers.com/2021/08/forestplot-%E2%9D%A4%EF%B8%8F-dplyr/
- 
- 
+#Subgroup
+
+data_model = subset(df3_ANZROD, HospitalClassification == "Private") # or Tertiary , Rural / Regional , Private , Metropolitan
+
+mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11)  + (1|SiteID), data=data_model, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
