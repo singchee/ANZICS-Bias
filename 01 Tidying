@@ -1,8 +1,6 @@
-library(ems)
 library(tidyverse)
 library(lubridate)
 library(car)
-library(pROC)
 
 SEIFAscore = SEIFAscore %>%
     filter(`Advantage and Disadvtage Decile` != "-")
