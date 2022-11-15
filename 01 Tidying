@@ -117,11 +117,16 @@ eff_IRSEAD = mod_IRSEAD %>%
     filter(str_detect(term, "IRSEAD")) %>% #filter out predictors that have "series" 
     mutate(across(c(estimate, starts_with("conf")), exp)) %>%
     mutate(IRSEAD = as.factor(seq_along(1:nrow(.))))
-
+    
+theme_set(theme_bw())
 eff_IRSEAD %>%
     ggplot(aes(x=IRSEAD, estimate)) + #plot
     geom_point() + 
-    geom_linerange(aes(ymin = conf.low, ymax = conf.high))
+    geom_linerange(aes(ymin = conf.low, ymax = conf.high)) + 
+    ylim(0.8, 1.2) + 
+    ylab('Odds Ratio for Mortality') +
+    xlab('IRSEAD Decile')
+    
 
 
 #Mixed effects modelling for IRSED
