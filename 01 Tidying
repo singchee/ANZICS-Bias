@@ -131,6 +131,8 @@ mod_IRSED = glmer(DIED_HOSP ~ ANZROD +
 	(1|SiteID), 
 	data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0) #IRSED
 
+#check for collinearity
+cars::vif(mod_IRSEAD)
 
 #extract IRSED estimates , PLOT SEIFA Estimates
  eff_IRSED = mod_IRSED %>%
