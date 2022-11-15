@@ -64,7 +64,11 @@ df2 = df1 %>%
     rename(Remoteness = 'Remoteness Index') %>%
     rename(IRSEAD = "Advantage and Disadvtage Decile") %>%
     mutate(IRSED = as.factor(IRSED), Remoteness = as.factor(Remoteness), IRSEAD = as.factor(IRSEAD)) %>%
-    mutate(year=year(ICU_AD_DTM))
+    mutate(year=year(ICU_AD_DTM)) %>%
+     mutate(IRSEAD_quart = case_when(IRSEAD %in% 1:2 ~ "1-3", 
+                                   IRSEAD %in% 3:5 ~ "4-5", 
+                                   IRSEAD %in% 6:8 ~ "6-8",
+                                   IRSEAD %in% 9:10 ~ "9-10")) #based on IQR of IRSEAD
  
 df3_ANZROD = df2 %>%
     filter(ANZRODIsSMR == 1)
@@ -76,10 +80,10 @@ library(tableone)
 
 catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag")
 
-tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "Apache3Score","ANZROD", 
-                                          "DIED_ICU","DIED_HOSP", 
-                                          "HOSP_HRS", "ICU_HRS", 
-                                          "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "SEIFA_quart", factorVars = catVars)
+tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
+                                                "DIED_ICU","DIED_HOSP", 
+                                                "HOSP_HRS", "ICU_HRS", 
+                                                "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "IRSEAD_quart", factorVars = catVars)
 
 
 tab_all = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
