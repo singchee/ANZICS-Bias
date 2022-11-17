@@ -72,35 +72,6 @@ df3_ANZROD = df2 %>%
     filter(ANZRODIsSMR == 1)
     
 
-#TABLE 1
-
-library(tableone)
-
-catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag")
-
-tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
-                                                "DIED_ICU","DIED_HOSP", 
-                                                "HOSP_HRS", "ICU_HRS", 
-                                                "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "IRSEAD_quart", factorVars = catVars)
-
-
-tab_all = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
-                                                "DIED_ICU","DIED_HOSP", 
-                                                "HOSP_HRS", "ICU_HRS", 
-                                                "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), factorVars = catVars)
-
-nonnormalVars = c("AGE", "Apache2Score", "Apache3Score","ANZROD", "HOSP_HRS", "ICU_HRS")
-
-tab1_merged=cbind(print(tab_all, nonnormal=nonnormalVars), print(tab, nonnormal=nonnormalVars))
-write.csv(tab1_merged, file="tab1_merged.csv")
-
-
-
-tab = CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
-
-tab_compareSEIFA = df3_ANZROD %>% filter(SEIFA == 1 | SEIFA == 10) %>%
-		 CreateTableOne(data = df3_ANZROD, vars =c("APACHE_diag"), strata= "SEIFA", factorVars = c("APACHE_diag"))
-
 #Mixed effects modelling for IRSEAD
 
 mod_IRSEAD = glmer(DIED_HOSP ~ ANZROD + 
