@@ -1,0 +1,6 @@
+
+#Subgroup
+
+data_model = subset(df3_ANZROD, HospitalClassification == "Private") # or Tertiary , Rural / Regional , Private , Metropolitan
+
+mod = glmer(DIED_HOSP ~ ANZROD + relevel(SEIFA, ref= 11)  + (1|SiteID), data=data_model, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0)
