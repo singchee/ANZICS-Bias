@@ -3,6 +3,7 @@ mod_IRSEAD = glmer(DIED_HOSP ~ ANZROD +
 	relevel(IRSEAD, ref= 10) + 
 	relevel(Remoteness, ref= 1) + 
 	HospitalClassification + 
+	year +
 	(1|SiteID), 
 	data=df3_ANZROD, family=binomial, control = glmerControl(optimizer = "bobyqa"), nAGQ = 0) #IRSEAD
 
