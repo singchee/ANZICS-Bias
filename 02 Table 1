@@ -3,15 +3,15 @@
 
 library(tableone)
 
-catVars=c("SEX","PLAN_ICU", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag")
+catVars=c("SEX","PLAN_ICU", "ICU_SRCE", "TREAT_LMT", "DIED_ICU","DIED_HOSP", "INOTROP_IND", "RENAL_IND", "ECMO_IND", "INV_IND","ELECT_SURG", "APACHE_diag")
 
-tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
+tab = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "ICU_SRCE", "TREAT_LMT",  "HospitalClassification", "Apache3Score","ANZROD", 
                                                 "DIED_ICU","DIED_HOSP", 
                                                 "HOSP_HRS", "ICU_HRS", 
                                                 "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), strata= "IRSEAD_quart", factorVars = catVars)
 
 
-tab_all = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG", "HospitalClassification", "Apache3Score","ANZROD", 
+tab_all = CreateTableOne(data = df3_ANZROD, vars =c("SEX", "AGE", "PLAN_ICU", "ELECT_SURG",  "ICU_SRCE", "TREAT_LMT", "HospitalClassification", "Apache3Score","ANZROD", 
                                                 "DIED_ICU","DIED_HOSP", 
                                                 "HOSP_HRS", "ICU_HRS", 
                                                 "ECMO_IND", "INV_IND", "RENAL_IND", "INOTROP_IND", "APACHE_diag"), factorVars = catVars)
